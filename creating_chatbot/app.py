@@ -14,21 +14,24 @@ load_dotenv()
 KEY = os.getenv("OPENAI_API_KEY")
 embedding_function = OpenAIEmbeddings(openai_api_key=KEY)
 
-vectordb = Chroma(persist_directory='chromaDB',embedding_function=embedding_function)
+vectordb = Chroma(persist_directory='chromaDB2',embedding_function=embedding_function)
 prompt_template = """
-Answer the question based only on the following context:
+Answer the question based only on the provided context:
+
 {context}
 
 Question: {question}
 
-If the user does not mention the name of a college in their question, answer based on the previous context and ignore the current context.
+If the information is not available or if it is a nan value, respond with "Information not available."
 """
 PROMPT=PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+chain_type_kwargs={"prompt": PROMPT}
 
 model = ChatOpenAI(openai_api_key=KEY)
 retriever = vectordb.as_retriever()
 
-qa_chain = RetrievalQA.from_chain_type(llm=model,chain_type="stuff",retriever=retriever)
+qa_chain = RetrievalQA.from_chain_type(llm=model,chain_type="stuff",retriever=retriever,chain_type_kwargs=chain_type_kwargs)
+
 
 app = Flask(__name__)
 
@@ -44,6 +47,7 @@ def chat():
     result=qa_chain({"query": input})
     print("Response : ", result["result"])
     return str(result["result"])
+
 
 
 
