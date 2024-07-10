@@ -1,0 +1,13 @@
+streamlit
+PyPDF2
+langchain
+langchain-community
+flask
+python-dotenv
+chromadb
+openai
+tiktoken
+streamlit_chat
+sentence-transformers
+pinecone-client
+pypdf

@@ -1,3 +1,4 @@
+
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
@@ -6,7 +7,6 @@ from langchain.prompts import (PromptTemplate, SystemMessagePromptTemplate, Huma
 import streamlit as st
 from streamlit_chat import message
 from dotenv import load_dotenv
-from utils import *
 import os
 load_dotenv()
 KEY=os.getenv("OPENAI_API_KEY")

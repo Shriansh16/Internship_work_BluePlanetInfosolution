@@ -1,5 +1,5 @@
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import ConversationChain
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.prompts import (
     SystemMessagePromptTemplate,
@@ -9,13 +9,14 @@ from langchain.prompts import (
 )
 import streamlit as st
 from streamlit_chat import message
-from utils import *
-import os
+from utils1 import *
 from dotenv import load_dotenv
-load_dotenv()
-KEY=os.getenv("OPENAI_API_KEY")
+import os
 
-st.subheader("Chatbot with Langchain, ChatGPT, Pinecone, and Streamlit")
+load_dotenv()
+KEY = os.getenv("OPENAI_API_KEY")
+
+st.subheader("HELPDESK CHAT")
 
 if 'responses' not in st.session_state:
     st.session_state['responses'] = ["How can I assist you?"]
@@ -26,7 +27,7 @@ if 'requests' not in st.session_state:
 llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=KEY)
 
 if 'buffer_memory' not in st.session_state:
-            st.session_state.buffer_memory=ConversationBufferWindowMemory(k=3,return_messages=True)
+    st.session_state.buffer_memory = ConversationBufferWindowMemory(k=3, return_messages=True)
 
 
 system_msg_template = SystemMessagePromptTemplate.from_template(template="""Answer the question as truthfully as possible using the provided context, 
@@ -37,7 +38,11 @@ human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}"
 
 prompt_template = ChatPromptTemplate.from_messages([system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
 
-conversation = ConversationChain(memory=st.session_state.buffer_memory, prompt=prompt_template, llm=llm, verbose=True)
+conversation = RunnableWithMessageHistory(
+    runnable=llm,  # Assuming ChatOpenAI implements Runnable
+    get_session_history=lambda: st.session_state['responses'],
+    verbose=True
+)
 
 
 
@@ -58,14 +63,22 @@ with textcontainer:
             st.subheader("Refined Query:")
             st.write(refined_query)
             context = find_match(refined_query)
-            # print(context)  
+            # print(context)
+
+            # Update the predict method based on your LangChain version
+            # Case 1: If predict takes query as a keyword argument
             response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
-        st.session_state.requests.append(query)
-        st.session_state.responses.append(response) 
+
+            # Case 2: If predict takes query as a positional argument
+            # response = conversation.predict(f"Context:\n {context} \n\n Query:\n{query}")
+
+            st.session_state.requests.append(query)
+            st.session_state.responses.append(response)
+
 with response_container:
     if st.session_state['responses']:
 
         for i in range(len(st.session_state['responses'])):
-            message(st.session_state['responses'][i],key=str(i))
+            message(st.session_state['responses'][i], key=str(i))
             if i < len(st.session_state['requests']):
-                message(st.session_state["requests"][i], is_user=True,key=str(i)+ '_user')
+                message(st.session_state["requests"][i], is_user=True, key=str(i) + '_user')

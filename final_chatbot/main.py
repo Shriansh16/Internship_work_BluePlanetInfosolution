@@ -9,13 +9,14 @@ from langchain.prompts import (
 )
 import streamlit as st
 from streamlit_chat import message
-from utils import *
-import os
+from utils1 import *
 from dotenv import load_dotenv
+import os
+
 load_dotenv()
 KEY=os.getenv("OPENAI_API_KEY")
 
-st.subheader("Chatbot with Langchain, ChatGPT, Pinecone, and Streamlit")
+st.subheader("HELPDESK CHAT")
 
 if 'responses' not in st.session_state:
     st.session_state['responses'] = ["How can I assist you?"]
@@ -69,3 +70,5 @@ with response_container:
             message(st.session_state['responses'][i],key=str(i))
             if i < len(st.session_state['requests']):
                 message(st.session_state["requests"][i], is_user=True,key=str(i)+ '_user')
+
+          
