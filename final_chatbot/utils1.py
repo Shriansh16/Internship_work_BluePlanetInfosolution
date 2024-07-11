@@ -4,6 +4,7 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
+from langchain.embeddings import OpenAIEmbeddings
 from openai import OpenAI
 import os
 import streamlit as st
@@ -18,7 +19,7 @@ pc = PineconeClient(
 )
 index_name='smart-cookie-chatbot'
 index=pc.Index(index_name)
-model=download_embeddings()
+model=OpenAIEmbeddings(api_key=KEY)
 
 def find_match(input):
     vectorstore = Pinecone(
@@ -57,7 +58,7 @@ def query_refiner(conversation, query):
   response = chat_service.completions.create(
       model="gpt-3.5-turbo",
       messages=[
-          {"role": "system", "content": "You are a helpful assistant."},
+          {"role": "system", "content": "You are a helpdesk chatbot on a website and your task is to assist visitors."},
           {"role": "user", "content": f"Given the following user query and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.\n\nCONVERSATION LOG: \n{conversation}\n\nQuery: {query}\n\nRefined Query:"}
       ],
       temperature=0.7,

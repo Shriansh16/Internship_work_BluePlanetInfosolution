@@ -10,16 +10,18 @@ import tiktoken
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from tqdm.auto import tqdm
 from uuid import uuid4
+from langchain.embeddings import OpenAIEmbeddings
 
 
 
 load_dotenv()
-
+KEY=os.getenv("OPENAI_API_KEY")
+embeddings=OpenAIEmbeddings(api_key=KEY)
 pc = PineconeClient(
     api_key=os.environ.get("PINECONE_API_KEY")
 )
 extracted_data=load_pdf("data/")
-embeddings=download_embeddings()
+#embeddings=download_embeddings()
 
 
 spec = ServerlessSpec(
